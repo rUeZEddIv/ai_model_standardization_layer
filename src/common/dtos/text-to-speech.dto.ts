@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean, IsArray, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SpeakerDto {
@@ -36,7 +42,10 @@ export class TextToSpeechDto {
   @IsString()
   language?: string;
 
-  @ApiPropertyOptional({ description: 'Make generation public', default: false })
+  @ApiPropertyOptional({
+    description: 'Make generation public',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isPublic?: boolean;
@@ -57,14 +66,17 @@ export class TextToSpeechMultiDto {
   @IsString()
   language?: string;
 
-  @ApiPropertyOptional({ description: 'Make generation public', default: false })
+  @ApiPropertyOptional({
+    description: 'Make generation public',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isPublic?: boolean;
 
-  @ApiProperty({ 
-    description: 'Array of speakers (max 10)', 
-    type: [SpeakerDto]
+  @ApiProperty({
+    description: 'Array of speakers (max 10)',
+    type: [SpeakerDto],
   })
   @IsArray()
   @ValidateNested({ each: true })

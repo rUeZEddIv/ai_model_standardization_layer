@@ -11,10 +11,7 @@ export class WebhooksService {
     private readonly jobsService: JobsService,
   ) {}
 
-  async handleWebhook(
-    provider: string,
-    payload: any,
-  ): Promise<any> {
+  async handleWebhook(provider: string, payload: any): Promise<any> {
     this.logger.log(`Received webhook from ${provider}`);
 
     try {
@@ -30,16 +27,13 @@ export class WebhooksService {
       // Try to find and update job
       const job = await this.prisma.job.findFirst({
         where: {
-          OR: [
-            { id: payload.jobId },
-            { providerTaskId: payload.taskId },
-          ],
+          OR: [{ id: payload.jobId }, { providerTaskId: payload.taskId }],
         },
       });
 
       if (job) {
         await this.jobsService.updateJobStatus(job.id, payload);
-        
+
         await this.prisma.webhookEvent.update({
           where: { id: webhookEvent.id },
           data: {
@@ -51,7 +45,9 @@ export class WebhooksService {
 
         this.logger.log(`Webhook processed for job ${job.id}`);
       } else {
-        this.logger.warn(`Job not found for webhook: ${JSON.stringify(payload)}`);
+        this.logger.warn(
+          `Job not found for webhook: ${JSON.stringify(payload)}`,
+        );
       }
 
       return { success: true };

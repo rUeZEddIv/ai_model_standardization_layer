@@ -150,11 +150,9 @@ export class GeminiGenAdapter extends BaseAdapter {
     try {
       const endpoint = this.getEndpoint(category);
       const response = await firstValueFrom(
-        this.httpService.post(
-          `${this.baseUrl}${endpoint}`,
-          mappedRequest,
-          { headers: this.getHeaders(apiKey) },
-        ),
+        this.httpService.post(`${this.baseUrl}${endpoint}`, mappedRequest, {
+          headers: this.getHeaders(apiKey),
+        }),
       );
       return response.data;
     } catch (error) {
@@ -165,10 +163,9 @@ export class GeminiGenAdapter extends BaseAdapter {
   async getStatus(taskId: string, apiKey: string): Promise<any> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(
-          `${this.baseUrl}/generation/${taskId}`,
-          { headers: this.getHeaders(apiKey) },
-        ),
+        this.httpService.get(`${this.baseUrl}/generation/${taskId}`, {
+          headers: this.getHeaders(apiKey),
+        }),
       );
       return response.data;
     } catch (error) {

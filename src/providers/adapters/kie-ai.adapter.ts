@@ -17,7 +17,7 @@ export class KieAiAdapter extends BaseAdapter {
 
   protected getHeaders(apiKey: string): Record<string, string> {
     return {
-      'Authorization': `Bearer ${apiKey}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     };
   }
@@ -79,9 +79,12 @@ export class KieAiAdapter extends BaseAdapter {
     return {
       taskId: providerResponse.data?.taskId || providerResponse.taskId,
       status: this.mapStatus(providerResponse.data?.successFlag),
-      statusPercentage: this.getStatusPercentage(providerResponse.data?.successFlag),
-      resultUrl: providerResponse.data?.response?.resultImageUrl || 
-                 providerResponse.data?.response?.resultVideoUrl,
+      statusPercentage: this.getStatusPercentage(
+        providerResponse.data?.successFlag,
+      ),
+      resultUrl:
+        providerResponse.data?.response?.resultImageUrl ||
+        providerResponse.data?.response?.resultVideoUrl,
       thumbnailUrl: providerResponse.data?.response?.thumbnailUrl,
       errorMessage: providerResponse.data?.errorMessage,
       errorCode: providerResponse.data?.errorCode,
@@ -92,9 +95,12 @@ export class KieAiAdapter extends BaseAdapter {
     return {
       taskId: webhookPayload.data?.taskId,
       status: this.mapStatus(webhookPayload.data?.info?.successFlag),
-      statusPercentage: this.getStatusPercentage(webhookPayload.data?.info?.successFlag),
-      resultUrl: webhookPayload.data?.info?.resultImageUrl || 
-                 webhookPayload.data?.info?.resultVideoUrl,
+      statusPercentage: this.getStatusPercentage(
+        webhookPayload.data?.info?.successFlag,
+      ),
+      resultUrl:
+        webhookPayload.data?.info?.resultImageUrl ||
+        webhookPayload.data?.info?.resultVideoUrl,
       errorMessage: webhookPayload.data?.info?.errorMessage,
       errorCode: webhookPayload.data?.info?.errorCode,
     };
@@ -136,11 +142,9 @@ export class KieAiAdapter extends BaseAdapter {
     try {
       const endpoint = this.getEndpoint(category);
       const response = await firstValueFrom(
-        this.httpService.post(
-          `${this.baseUrl}${endpoint}`,
-          mappedRequest,
-          { headers: this.getHeaders(apiKey) },
-        ),
+        this.httpService.post(`${this.baseUrl}${endpoint}`, mappedRequest, {
+          headers: this.getHeaders(apiKey),
+        }),
       );
       return response.data;
     } catch (error) {

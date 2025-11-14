@@ -17,7 +17,10 @@ import { AudioToVideoDto } from '../../common/dtos/audio-to-video.dto';
 import { StoryboardToVideoDto } from '../../common/dtos/storyboard-to-video.dto';
 import { TextToMusicDto } from '../../common/dtos/text-to-music.dto';
 import { SpeechToTextDto } from '../../common/dtos/speech-to-text.dto';
-import { TextToSpeechDto, TextToSpeechMultiDto } from '../../common/dtos/text-to-speech.dto';
+import {
+  TextToSpeechDto,
+  TextToSpeechMultiDto,
+} from '../../common/dtos/text-to-speech.dto';
 import { StandardizedResponseDto } from '../../common/dtos/standardized-response.dto';
 
 @ApiTags('Generation')

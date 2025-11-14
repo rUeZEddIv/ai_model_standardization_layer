@@ -92,7 +92,10 @@ export class JobsService {
         );
 
         // Map response
-        const mappedResponse = adapter.mapResponse(job.category, providerResponse);
+        const mappedResponse = adapter.mapResponse(
+          job.category,
+          providerResponse,
+        );
 
         // Update job with response
         await this.prisma.job.update({
@@ -101,10 +104,12 @@ export class JobsService {
             providerResponse,
             responseData: mappedResponse,
             providerTaskId: mappedResponse.taskId,
-            status: mappedResponse.status === 'COMPLETED' 
-              ? JobStatus.COMPLETED 
-              : JobStatus.PROCESSING,
-            completedAt: mappedResponse.status === 'COMPLETED' ? new Date() : null,
+            status:
+              mappedResponse.status === 'COMPLETED'
+                ? JobStatus.COMPLETED
+                : JobStatus.PROCESSING,
+            completedAt:
+              mappedResponse.status === 'COMPLETED' ? new Date() : null,
             resultUrl: mappedResponse.resultUrl,
             thumbnailUrl: mappedResponse.thumbnailUrl,
           },
@@ -115,7 +120,6 @@ export class JobsService {
 
         this.logger.log(`Job ${job.id} submitted successfully`);
         return;
-
       } catch (error) {
         attempt++;
         this.logger.error(
@@ -124,7 +128,10 @@ export class JobsService {
 
         // Mark API key as error
         if (apiKey) {
-          if (error.message.includes('rate limit') || error.message.includes('429')) {
+          if (
+            error.message.includes('rate limit') ||
+            error.message.includes('429')
+          ) {
             await this.apiKeysService.markKeyAsRateLimited(apiKey.id);
           } else {
             await this.apiKeysService.markKeyAsError(apiKey.id, error.message);
@@ -170,26 +177,28 @@ export class JobsService {
   async updateJobStatus(jobId: string, webhookData: any): Promise<any> {
     const job = await this.getJob(jobId);
     const adapter = this.adapterFactory.getAdapter(job.provider.slug);
-    
+
     // Map webhook data to standard format
     const mappedData = adapter.mapWebhook(webhookData);
 
     return this.prisma.job.update({
       where: { id: jobId },
       data: {
-        status: mappedData.status === 'COMPLETED' 
-          ? JobStatus.COMPLETED 
-          : mappedData.status === 'FAILED'
-          ? JobStatus.FAILED
-          : JobStatus.PROCESSING,
+        status:
+          mappedData.status === 'COMPLETED'
+            ? JobStatus.COMPLETED
+            : mappedData.status === 'FAILED'
+              ? JobStatus.FAILED
+              : JobStatus.PROCESSING,
         responseData: mappedData,
         resultUrl: mappedData.resultUrl,
         thumbnailUrl: mappedData.thumbnailUrl,
         errorMessage: mappedData.errorMessage,
         errorCode: mappedData.errorCode,
-        completedAt: mappedData.status === 'COMPLETED' || mappedData.status === 'FAILED'
-          ? new Date()
-          : null,
+        completedAt:
+          mappedData.status === 'COMPLETED' || mappedData.status === 'FAILED'
+            ? new Date()
+            : null,
       },
     });
   }

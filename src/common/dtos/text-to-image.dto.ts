@@ -10,12 +10,16 @@ export class TextToImageDto {
   @IsString()
   prompt: string;
 
-  @ApiPropertyOptional({ description: 'Aspect ratio of the output image (e.g., 16:9, 1:1)' })
+  @ApiPropertyOptional({
+    description: 'Aspect ratio of the output image (e.g., 16:9, 1:1)',
+  })
   @IsOptional()
   @IsString()
   aspectRatio?: string;
 
-  @ApiPropertyOptional({ description: 'Resolution of the output image (e.g., 1080p, 720p)' })
+  @ApiPropertyOptional({
+    description: 'Resolution of the output image (e.g., 1080p, 720p)',
+  })
   @IsOptional()
   @IsString()
   resolution?: string;
@@ -30,7 +34,10 @@ export class TextToImageDto {
   @IsNumber()
   numberOfGenerations?: number;
 
-  @ApiPropertyOptional({ description: 'Make generation public', default: false })
+  @ApiPropertyOptional({
+    description: 'Make generation public',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isPublic?: boolean;

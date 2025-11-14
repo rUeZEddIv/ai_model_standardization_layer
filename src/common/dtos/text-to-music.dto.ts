@@ -15,7 +15,10 @@ export class TextToMusicDto {
   @IsString()
   musicStyle: string;
 
-  @ApiPropertyOptional({ description: 'Generate instrumental only', default: false })
+  @ApiPropertyOptional({
+    description: 'Generate instrumental only',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isInstrumental?: boolean;
@@ -30,7 +33,10 @@ export class TextToMusicDto {
   @IsString()
   vocalGender?: string;
 
-  @ApiPropertyOptional({ description: 'Make generation public', default: false })
+  @ApiPropertyOptional({
+    description: 'Make generation public',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isPublic?: boolean;

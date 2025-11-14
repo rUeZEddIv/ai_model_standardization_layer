@@ -15,12 +15,16 @@ export class TextToVideoDto {
   @IsNumber()
   duration?: number;
 
-  @ApiPropertyOptional({ description: 'Aspect ratio of the output video (e.g., 16:9, 9:16)' })
+  @ApiPropertyOptional({
+    description: 'Aspect ratio of the output video (e.g., 16:9, 9:16)',
+  })
   @IsOptional()
   @IsString()
   aspectRatio?: string;
 
-  @ApiPropertyOptional({ description: 'Resolution of the output video (e.g., 1080p, 720p)' })
+  @ApiPropertyOptional({
+    description: 'Resolution of the output video (e.g., 1080p, 720p)',
+  })
   @IsOptional()
   @IsString()
   resolution?: string;
@@ -35,7 +39,10 @@ export class TextToVideoDto {
   @IsNumber()
   numberOfGenerations?: number;
 
-  @ApiPropertyOptional({ description: 'Make generation public', default: false })
+  @ApiPropertyOptional({
+    description: 'Make generation public',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isPublic?: boolean;

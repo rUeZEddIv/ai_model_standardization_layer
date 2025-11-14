@@ -19,14 +19,13 @@ export class ApiKeysService {
           { rateLimitResetAt: { lte: new Date() } },
         ],
       },
-      orderBy: [
-        { priority: 'desc' },
-        { lastUsedAt: 'asc' },
-      ],
+      orderBy: [{ priority: 'desc' }, { lastUsedAt: 'asc' }],
     });
 
     if (keys.length === 0) {
-      throw new Error(`No active API keys available for provider ${providerId}`);
+      throw new Error(
+        `No active API keys available for provider ${providerId}`,
+      );
     }
 
     const selectedKey = keys[0];
@@ -58,7 +57,9 @@ export class ApiKeysService {
           errorCount: newErrorCount,
         },
       });
-      this.logger.warn(`API Key ${apiKeyId} marked as ERROR after ${newErrorCount} failures`);
+      this.logger.warn(
+        `API Key ${apiKeyId} marked as ERROR after ${newErrorCount} failures`,
+      );
     } else {
       await this.prisma.apiKey.update({
         where: { id: apiKeyId },
@@ -75,7 +76,9 @@ export class ApiKeysService {
         rateLimitResetAt: resetAt || new Date(Date.now() + 60 * 60 * 1000), // Default 1 hour
       },
     });
-    this.logger.warn(`API Key ${apiKeyId} marked as RATE_LIMITED until ${resetAt}`);
+    this.logger.warn(
+      `API Key ${apiKeyId} marked as RATE_LIMITED until ${resetAt}`,
+    );
   }
 
   async resetErrorCount(apiKeyId: string): Promise<void> {
@@ -88,7 +91,11 @@ export class ApiKeysService {
     });
   }
 
-  async createApiKey(providerId: string, key: string, priority: number = 0): Promise<any> {
+  async createApiKey(
+    providerId: string,
+    key: string,
+    priority: number = 0,
+  ): Promise<any> {
     return this.prisma.apiKey.create({
       data: {
         providerId,
@@ -103,14 +110,14 @@ export class ApiKeysService {
     return this.prisma.apiKey.findMany({
       where: providerId ? { providerId } : undefined,
       include: { provider: true },
-      orderBy: [
-        { providerId: 'asc' },
-        { priority: 'desc' },
-      ],
+      orderBy: [{ providerId: 'asc' }, { priority: 'desc' }],
     });
   }
 
-  async updateApiKeyStatus(apiKeyId: string, status: ApiKeyStatus): Promise<any> {
+  async updateApiKeyStatus(
+    apiKeyId: string,
+    status: ApiKeyStatus,
+  ): Promise<any> {
     return this.prisma.apiKey.update({
       where: { id: apiKeyId },
       data: { status },

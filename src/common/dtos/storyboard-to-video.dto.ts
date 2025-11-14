@@ -1,12 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean, IsArray, ValidateNested, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsArray,
+  ValidateNested,
+  IsNumber,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SceneDto {
-  @ApiPropertyOptional({ 
-    description: 'Scene image (optional)', 
+  @ApiPropertyOptional({
+    description: 'Scene image (optional)',
     type: 'string',
-    format: 'binary'
+    format: 'binary',
   })
   @IsOptional()
   @IsString()
@@ -26,24 +33,31 @@ export class StoryboardToVideoDto {
   @IsString()
   aiModelId: string;
 
-  @ApiPropertyOptional({ description: 'Aspect ratio of the output video (e.g., 16:9, 9:16)' })
+  @ApiPropertyOptional({
+    description: 'Aspect ratio of the output video (e.g., 16:9, 9:16)',
+  })
   @IsOptional()
   @IsString()
   aspectRatio?: string;
 
-  @ApiPropertyOptional({ description: 'Resolution of the output video (e.g., 1080p, 720p)' })
+  @ApiPropertyOptional({
+    description: 'Resolution of the output video (e.g., 1080p, 720p)',
+  })
   @IsOptional()
   @IsString()
   resolution?: string;
 
-  @ApiPropertyOptional({ description: 'Make generation public', default: false })
+  @ApiPropertyOptional({
+    description: 'Make generation public',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isPublic?: boolean;
 
-  @ApiProperty({ 
-    description: 'Array of scenes (max 10)', 
-    type: [SceneDto]
+  @ApiProperty({
+    description: 'Array of scenes (max 10)',
+    type: [SceneDto],
   })
   @IsArray()
   @ValidateNested({ each: true })

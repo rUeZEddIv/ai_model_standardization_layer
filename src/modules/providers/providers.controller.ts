@@ -43,10 +43,7 @@ export class ProvidersController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update provider' })
-  async updateProvider(
-    @Param('id') id: string,
-    @Body() data: any,
-  ) {
+  async updateProvider(@Param('id') id: string, @Body() data: any) {
     return this.providersService.updateProvider(id, data);
   }
 

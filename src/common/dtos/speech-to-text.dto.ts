@@ -6,10 +6,10 @@ export class SpeechToTextDto {
   @IsString()
   aiModelId: string;
 
-  @ApiProperty({ 
-    description: 'Uploaded audio file', 
+  @ApiProperty({
+    description: 'Uploaded audio file',
     type: 'string',
-    format: 'binary'
+    format: 'binary',
   })
   @IsString()
   uploadedAudio: string;
@@ -19,7 +19,10 @@ export class SpeechToTextDto {
   @IsString()
   language?: string;
 
-  @ApiPropertyOptional({ description: 'Make generation public', default: false })
+  @ApiPropertyOptional({
+    description: 'Make generation public',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isPublic?: boolean;
