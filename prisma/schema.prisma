@@ -1,0 +1,161 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProviderStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+  RATE_LIMITED
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum GenerationCategory {
+  TEXT_TO_IMAGE
+  IMAGE_TO_IMAGE
+  TEXT_TO_VIDEO
+  IMAGE_TO_VIDEO
+  AUDIO_TO_VIDEO
+  STORYBOARD_TO_VIDEO
+  TEXT_TO_MUSIC
+  SPEECH_TO_TEXT
+  TEXT_TO_SPEECH_SINGLE
+  TEXT_TO_SPEECH_MULTI
+}
+
+model Provider {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  slug        String         @unique
+  baseUrl     String
+  status      ProviderStatus @default(ACTIVE)
+  description String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  models      AiModel[]
+  apiKeys     ApiKey[]
+  jobs        Job[]
+
+  @@map("providers")
+}
+
+model AiModel {
+  id                  String             @id @default(cuid())
+  providerId          String
+  name                String
+  slug                String
+  category            GenerationCategory
+  capabilities        Json               // Store capabilities as JSON
+  isActive            Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  
+  provider            Provider           @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  jobs                Job[]
+
+  @@unique([providerId, slug])
+  @@index([category])
+  @@map("ai_models")
+}
+
+model ApiKey {
+  id              String       @id @default(cuid())
+  providerId      String
+  key             String       @unique // Make key unique for upsert
+  status          ApiKeyStatus @default(ACTIVE)
+  priority        Int          @default(0) // Higher priority = used first
+  lastUsedAt      DateTime?
+  errorCount      Int          @default(0)
+  rateLimitResetAt DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  provider        Provider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  jobs            Job[]
+
+  @@index([providerId, status, priority])
+  @@map("api_keys")
+}
+
+model Job {
+  id                String             @id @default(cuid())
+  providerId        String
+  modelId           String
+  apiKeyId          String?
+  category          GenerationCategory
+  status            JobStatus          @default(PENDING)
+  
+  // Request data
+  requestData       Json               // Standardized request
+  providerRequest   Json?              // Mapped provider-specific request
+  
+  // Response data
+  responseData      Json?              // Standardized response
+  providerResponse  Json?              // Original provider response
+  
+  // Task tracking
+  providerTaskId    String?            // Task ID from provider
+  resultUrl         String?
+  thumbnailUrl      String?
+  
+  // Error handling
+  errorMessage      String?
+  errorCode         String?
+  retryCount        Int                @default(0)
+  maxRetries        Int                @default(3)
+  
+  // Timestamps
+  startedAt         DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  provider          Provider           @relation(fields: [providerId], references: [id])
+  model             AiModel            @relation(fields: [modelId], references: [id])
+  apiKey            ApiKey?            @relation(fields: [apiKeyId], references: [id])
+  webhookEvents     WebhookEvent[]
+
+  @@index([status, category])
+  @@index([providerTaskId])
+  @@map("jobs")
+}
+
+model WebhookEvent {
+  id              String   @id @default(cuid())
+  jobId           String
+  providerPayload Json     // Original webhook payload from provider
+  normalizedData  Json?    // Normalized to standard format
+  processed       Boolean  @default(false)
+  receivedAt      DateTime @default(now())
+  processedAt     DateTime?
+  
+  job             Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId, processed])
+  @@map("webhook_events")
+}
