@@ -1,0 +1,151 @@
+{
+  "info": {
+    "name": "AI Model Standardization Layer",
+    "description": "API collection for the AI Model Standardization Layer Gateway",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Models",
+      "item": [
+        {
+          "name": "Get Models by Category (Text-to-Image)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/models?category=TEXT_TO_IMAGE",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "models"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "TEXT_TO_IMAGE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Model Capabilities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/models/{{modelId}}/capabilities",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "models", "{{modelId}}", "capabilities"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Generation",
+      "item": [
+        {
+          "name": "Generate Text-to-Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-user-id",
+                "value": "{{userId}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aiModelId\": \"{{modelId}}\",\n  \"prompt\": \"A serene mountain landscape at sunset with vibrant colors\",\n  \"aspectRatio\": \"16:9\",\n  \"resolution\": \"1920x1080\",\n  \"seed\": 42,\n  \"numberOfGenerations\": 2,\n  \"isPublic\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/generate/text-to-image",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "generate", "text-to-image"]
+            }
+          }
+        },
+        {
+          "name": "Get Job Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/generate/jobs/{{jobId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "generate", "jobs", "{{jobId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "Provider Callback (Kie.ai format)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job_id\": \"kie-1234567890\",\n  \"status\": \"completed\",\n  \"results\": [\n    {\n      \"url\": \"https://storage.kie.ai/images/image1.png\"\n    },\n    {\n      \"url\": \"https://storage.kie.ai/images/image2.png\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/webhooks/provider-callback/{{jobId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "webhooks", "provider-callback", "{{jobId}}"]
+            }
+          }
+        },
+        {
+          "name": "Provider Callback (Geminigen.ai format)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"task_id\": \"geminigen-0987654321\",\n  \"state\": \"completed\",\n  \"images\": [\n    {\n      \"image_url\": \"https://cdn.geminigen.ai/outputs/img1.jpg\"\n    },\n    {\n      \"image_url\": \"https://cdn.geminigen.ai/outputs/img2.jpg\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/webhooks/provider-callback/{{jobId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "webhooks", "provider-callback", "{{jobId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "userId",
+      "value": "user-uuid-here"
+    },
+    {
+      "key": "modelId",
+      "value": "model-uuid-here"
+    },
+    {
+      "key": "jobId",
+      "value": "job-uuid-here"
+    }
+  ]
+}
