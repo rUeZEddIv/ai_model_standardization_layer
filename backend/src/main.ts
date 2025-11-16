@@ -34,6 +34,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('generations', 'Generation task management')
     .addTag('forms', 'Dynamic form schemas and categories')
+    .addTag('webhooks', 'Webhook receivers for provider callbacks')
     .addBearerAuth()
     .build();
 

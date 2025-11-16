@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ProvidersModule } from './providers/providers.module';
 import { GenerationsModule } from './generations/generations.module';
 import { FormsModule } from './forms/forms.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -18,6 +19,7 @@ import configuration from './config/configuration';
     ProvidersModule,
     GenerationsModule,
     FormsModule,
+    WebhooksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
