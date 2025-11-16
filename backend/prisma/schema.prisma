@@ -1,0 +1,168 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// AI Providers (KIE.AI, GeminiGen.AI, etc.)
+model AiProvider {
+  id         String    @id @default(uuid())
+  name       String    @unique @db.VarChar(100)
+  baseUrl    String    @db.VarChar(255)
+  authType   String    @db.VarChar(50) // 'Bearer', 'API-Key'
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  aiModels   AiModel[]
+  apiKeys    ApiKey[]
+  tasks      GenerationTask[]
+
+  @@map("ai_providers")
+}
+
+// Form Categories (Text to Image, Image to Video, etc.)
+model FormCategory {
+  id          String    @id @default(uuid())
+  name        String    @unique @db.VarChar(100)
+  slug        String    @unique @db.VarChar(100)
+  description String?   @db.Text
+  inputSchema Json?     // Stores form field definitions
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  aiModels    AiModel[]
+  tasks       GenerationTask[]
+
+  @@map("form_categories")
+}
+
+// AI Models (qwen/text-to-image, imagen-4, etc.)
+model AiModel {
+  id                String        @id @default(uuid())
+  providerId        String
+  modelIdentifier   String        @db.VarChar(255) // e.g., 'qwen/text-to-image'
+  displayName       String        @db.VarChar(255)
+  categoryId        String
+  isActive          Boolean       @default(true)
+  supportedFeatures Json?         // Stores capabilities
+  apiEndpoint       String?       @db.VarChar(255)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  provider          AiProvider    @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  category          FormCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  fieldMappings     ModelFieldMapping[]
+  tasks             GenerationTask[]
+
+  @@unique([providerId, modelIdentifier])
+  @@map("ai_models")
+}
+
+// Model-specific field mappings
+model ModelFieldMapping {
+  id                  String    @id @default(uuid())
+  modelId             String
+  fieldName           String    @db.VarChar(100)
+  fieldType           String    @db.VarChar(50) // 'text', 'select', 'number', 'boolean', 'upload', 'array'
+  isRequired          Boolean   @default(false)
+  defaultValue        String?   @db.Text
+  validationRules     Json?     // min, max, pattern, options, etc.
+  providerFieldName   String    @db.VarChar(100) // maps to provider's API field name
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  model               AiModel   @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@unique([modelId, fieldName])
+  @@map("model_field_mappings")
+}
+
+// API Keys for providers
+model ApiKey {
+  id           String    @id @default(uuid())
+  providerId   String
+  keyName      String    @db.VarChar(255)
+  apiKey       String    @db.VarChar(500) // Should be encrypted
+  isActive     Boolean   @default(true)
+  usageLimit   Int?
+  usageCount   Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  provider     AiProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+// Generation Tasks
+model GenerationTask {
+  id                String    @id @default(uuid())
+  userId            String?   // Optional: if user system exists
+  categoryId        String
+  modelId           String
+  providerId        String
+  taskId            String?   @db.VarChar(255) // provider's task ID
+  status            String    @db.VarChar(50) @default("pending") // 'pending', 'processing', 'completed', 'failed'
+  inputData         Json      // stores form input
+  outputData        Json?     // stores generation results
+  errorMessage      String?   @db.Text
+  webhookUrl        String?   @db.VarChar(500)
+  callbackReceived  Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  completedAt       DateTime?
+
+  category          FormCategory @relation(fields: [categoryId], references: [id])
+  model             AiModel      @relation(fields: [modelId], references: [id])
+  provider          AiProvider   @relation(fields: [providerId], references: [id])
+  results           GenerationResult[]
+  webhookLogs       WebhookLog[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("generation_tasks")
+}
+
+// Generation Results (files generated)
+model GenerationResult {
+  id            String    @id @default(uuid())
+  taskId        String
+  fileUrl       String    @db.VarChar(500)
+  fileType      String    @db.VarChar(50) // 'image', 'video', 'audio', 'text'
+  fileSize      BigInt?
+  thumbnailUrl  String?   @db.VarChar(500)
+  metadata      Json?
+  isPublic      Boolean   @default(false)
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  task          GenerationTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("generation_results")
+}
+
+// Webhook Logs
+model WebhookLog {
+  id          String    @id @default(uuid())
+  taskId      String
+  provider    String    @db.VarChar(100)
+  eventType   String    @db.VarChar(100)
+  payload     Json
+  signature   String?   @db.VarChar(500)
+  isVerified  Boolean   @default(false)
+  processed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  task        GenerationTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([processed])
+  @@map("webhook_logs")
+}
