@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// AI Providers (KIE.AI, GEMINIGEN.AI, etc.)
+model AIProvider {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  slug      String    @unique
+  apiKey    String    // Encrypted
+  baseUrl   String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  models    AIModel[]
+  
+  @@map("ai_providers")
+}
+
+// Form Categories (text-to-image, image-to-image, etc.)
+model FormCategory {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  models      AIModel[]
+  
+  @@map("form_categories")
+}
+
+// AI Models with dynamic capabilities
+model AIModel {
+  id                  String       @id @default(uuid())
+  providerId          String
+  categoryId          String
+  externalModelId     String       // Original ID from provider
+  name                String
+  capabilities        Json         // JSONB: ratios, resolutions, supports_negative_prompt, etc.
+  formSchemaOverride  Json?        // JSONB: Optional custom form fields
+  isActive            Boolean      @default(true)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  
+  provider            AIProvider   @relation(fields: [providerId], references: [id])
+  category            FormCategory @relation(fields: [categoryId], references: [id])
+  transactions        Transaction[]
+  
+  @@unique([providerId, externalModelId])
+  @@map("ai_models")
+}
+
+// Transactions for tracking generation requests
+model Transaction {
+  id               String   @id @default(uuid())
+  userId           String?  // Optional user tracking
+  modelId          String
+  status           TransactionStatus @default(PENDING)
+  inputPayload     Json     // JSONB: User input data
+  providerResponse Json?    // JSONB: Raw provider response
+  outputResult     Json?    // JSONB: Generated content URLs
+  errorMessage     String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  model            AIModel  @relation(fields: [modelId], references: [id])
+  
+  @@index([userId])
+  @@index([status])
+  @@map("transactions")
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
